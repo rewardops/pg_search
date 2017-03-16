@@ -28,7 +28,15 @@ module PgSearch
       end
 
       def column_name
-        @connection.quote_column_name(@column_name)
+        # Ref: https://github.com/rovr/pg_search/commit/02979f65593a1684c42ee2bc9a9e03a02d6f9a4e
+        # If column name is already quoted, we assume no further quoting is
+        # necessary. This allows advanced SQL such as using a jsonb traversal
+        # expression as the column name.
+        if @column_name.include?('"')
+          @column_name
+        else
+          @connection.quote_column_name(@column_name)
+        end
       end
 
       def expression
